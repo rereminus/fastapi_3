@@ -85,7 +85,7 @@ def delete_user(id: int, DB: Session = Depends(get_session)):
 def edit_user(item: Annotated[Main_User, Body(embed=True, description="Изменяем данные по id")],
               DB: Session = Depends(get_session)):
     try:
-        user = find_user(str(item.id))
+        user = DB.get(User, item.id)
         if user is None:
             return New_Response(message="Пользователь не найден")
         update_user_dict = item.model_dump(exclude_unset=True)
