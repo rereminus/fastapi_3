@@ -3,9 +3,6 @@ import os
 
 
 class Settings:
-    app_name: str = "New API"
-    admin_email: str = "eremalda@gmail.com"
-    DATABASE_URL: str = "sqlite:///./test.db"
     POSTGRES_DATABASE_URLS: str = "postgresql://postgres@localhost:5432/db"
     #POSTGRES_DATABASE_URLA: str = "postgresql+asyncpg://postgres@localhost:5432/db"
     POSTGRES_USER: str

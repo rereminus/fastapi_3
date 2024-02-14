@@ -15,7 +15,6 @@ def get_session():
 
 
 user_router = APIRouter(tags=[Tags.users], prefix='/api/users')
-info_router = APIRouter(tags=[Tags.info])
 
 
 def coder_passwd(cod: str):
@@ -44,6 +43,7 @@ def create_user(item: Annotated[Main_User, Body(embed=True, description="Нов�
                 DB: Session = Depends(get_session)):
     try:
         user = User(name=item.name, hashed_password=coder_passwd(item.name))
+        user.department_id = item.department_id
         if user is None:
             raise HTTPException(status_code=404, detail="Объект не определен")
         DB.add(user)
@@ -82,18 +82,20 @@ def delete_user(id: int, DB: Session = Depends(get_session)):
 
 
 @user_router.patch("/{id}", response_model=Union[Main_User, New_Response], tags=[Tags.users])
-def edit_user(item: Annotated[Main_User, Body(embed=True, description="Изменяем данные по id")],
-              DB: Session = Depends(get_session)):
+def update_user(item: Annotated[Main_User, Body(embed=True, description="Изменение данных для пользователя по id")],
+                DB: Session = Depends(get_session)):
+    user = DB.query(User).filter(User.id == id).first()
+    if user is None:
+        return JSONResponse(status_code=404, content={"message": "Пользователь не найден"})
+
+    if item.name is not None:
+        user.name = item.name
+    if item.department_id is not None:
+        user.department_id = item.department_id
+
     try:
-        user = DB.get(User, item.id)
-        if user is None:
-            return New_Response(message="Пользователь не найден")
-        update_user_dict = item.model_dump(exclude_unset=True)
-        for key, value in update_user_dict:
-            setattr(user, key, value)
-        DB.add(user)
         DB.commit()
         DB.refresh(user)
-        return user
-    except HTTPException:
-        return JSONResponse(status_code=404, content={"message": "Ошибка"})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"message": "Произошла ошибка при обновлении пользователя"})
+    return user
