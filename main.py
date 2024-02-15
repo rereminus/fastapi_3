@@ -1,5 +1,3 @@
-import databases
-import sqlalchemy
 import uvicorn
 from datetime import datetime
 from fastapi import FastAPI
@@ -11,9 +9,9 @@ from public.router_deps import deps_router
 
 app = FastAPI()
 
-#db.create_tables()
-#db.f_builder2()
-#db.f_builder()
+db.create_tables()
+db.f_builder2()
+db.f_builder()
 
 app.include_router(user_router)
 app.include_router(deps_router)
